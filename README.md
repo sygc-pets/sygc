@@ -42,7 +42,7 @@ It runs evaluation on precompiled netlists.
 ```
 
 ## Execute GC Back-end
-Run `./bin/eval_SYGC` to run GC protcol on a netlist. A large library of pre-compiled netlists are provided in `sygc/netlists_pi`
+Run `./bin/SYGC` to run GC protcol on a netlist. A large library of pre-compiled netlists are provided in `sygc/netlists_pi`. These netlists are required for the programming interface. It is also possible to run them directly through the GC back-end with the following command. 
 
 ```  
  ./bin/SYGC   
@@ -70,7 +70,7 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
 ## Program Interface
 
-- Please see [millionaire.cpp](exec/millionaire.cpp) for a minimal working example. It is an implementation of the Yao's Millionaire's Problem through SYGC. To run the program,
+- [millionaire.cpp](exec/millionaire.cpp) presents a minimal working example with the programming interface of SYGC. It is an implementation of the Yao's Millionaire's Problem through SYGC. The security model can be swicthed by changing the `SEC_SH` macro on [line 11](exec/millionaire.cpp#L11). To run the program,
 
     On Alice's terminal
 
@@ -86,7 +86,9 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
     It will prompt to input the respective wealths. Upon receiving the input, the output will be displayed. 
 
-- Please see [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h) for the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation).
+- To see the usage of all the available functions of SYGC, have a look at [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h). The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation).
+
+- [cnn_layers](sygc/cnn_layers.h) presents more complex examples based on the programming interface. It provides implementations of basic building blocks required for CNN inference. Currently it supports only the honest-but-curious security model. 
 
 - Please see [LeNet.cpp](exec/LeNet.cpp) for an example of CNN inference through SYGC. To run the program,
 
