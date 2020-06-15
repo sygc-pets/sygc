@@ -84,9 +84,25 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
     ./bin/millionaire -k 2
     ```
 
-    It will prompt to input the respective wealth's. Upon receiving the input, the outputs will be displayed. 
+    It will prompt to input the respective wealths. Upon receiving the input, the output will be displayed. 
 
-- Please see [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation)
+- Please see [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h) for the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation).
+
+- Please see [LeNet.cpp](exec/LeNet.cpp) for an example of CNN inference through SYGC. To run the program,
+
+    On Alice's terminal
+
+    ```
+    ./bin/LeNet < test/LenetSmall_mnist_img_A.inp
+    ```
+
+    On Bob's terminal
+
+    ```
+    ./bin/LeNet -k 2 < test/LenetSmall_mnist_img_B.inp
+    ```
+    [LenetSmall_mnist_img_A.inp](test/LenetSmall_mnist_img_A.inp) holds the trained weight parameters of the CNN and [LenetSmall_mnist_img_B.inp](test/LenetSmall_mnist_img_B.inp) holds an example image. This particular image belongs to class 2. 
+    
 
 
 
