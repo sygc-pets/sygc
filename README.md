@@ -13,7 +13,7 @@ which are adapted from the [emp-toolkit](https://github.com/emp-toolkit).
 
 - After the set up, run `./config.sh` followed by `make` if required to build SYGC.
 
-## Test and Evaluation
+## [Test and Evaluation](#test)
 - Run `./bin/test_SYGC.sh` to test build for correctness.
 It runs evaluation on precompiled netlists.
 
@@ -67,5 +67,26 @@ Run `./bin/eval_SYGC` to run GC protcol on a netlist. A large library of pre-com
     --oo                                    report output only
 ```
 The total execution runs for `cycles*repeat` times. The DFFs reset to `init` after every `cycles` run. 
+
+## Program Interface
+
+- Please see [millionaire.cpp](exec/millionaire.cpp) for a minimal working example. It is an implementation of the Yao's Millionaire's Problem through SYGC. To run the program,
+
+    On Alice's terminal
+
+    ```
+    ./bin/millionaire
+    ```
+
+    On Bob's terminal
+
+    ```
+    ./bin/millionaire -k 2
+    ```
+
+    It will prompt to input the respective wealth's. Upon receiving the input, the outputs will be displayed. 
+
+- Please see [unit_test](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test.h) or [unit_test_sh](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/test)
+
 
 
