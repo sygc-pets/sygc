@@ -13,7 +13,7 @@ which are adapted from the [emp-toolkit](https://github.com/emp-toolkit).
 
 - After the set up, run `./config.sh` followed by `make` if required to build SYGC.
 
-## [Test and Evaluation](#test)
+## [Test and Evaluation](#test-and-evaluation)
 - Run `./bin/test_SYGC.sh` to test build for correctness.
 It runs evaluation on precompiled netlists.
 
@@ -86,7 +86,7 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
     It will prompt to input the respective wealth's. Upon receiving the input, the outputs will be displayed. 
 
-- Please see [unit_test](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test.h) or [unit_test_sh](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](https://github.com/sygc-pets/sygc#test)
+- Please see [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/#test-and-evaluation)
 
 
 
