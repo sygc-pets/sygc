@@ -86,7 +86,7 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
     It will prompt to input the respective wealth's. Upon receiving the input, the outputs will be displayed. 
 
-- Please see [unit_test](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test.h) or [unit_test_sh](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/test)
+- Please see [unit_test](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test.h) or [unit_test_sh](https://github.com/sygc-pets/sygc/blob/master/exec/unit_test_sh.h) for a the usage of all the available functions of SYGC. The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](https://github.com/sygc-pets/sygc#test)
 
 
 
