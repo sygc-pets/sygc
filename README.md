@@ -1,4 +1,4 @@
-# SYGC 2.0
+# SYGC
 
 ### Smart, efficient and scalable Yao's Garbled Circuit (GC)
 
@@ -61,7 +61,7 @@ Run `./bin/eval_SYGC` to run GC protcol on a netlist. A large library of pre-com
                                             2: transfer output to next netlist at every cycle
                                             3: transfer output to next netlist at last cycle
     -f [ --file ] arg                       netlist, input, init, cycles, repeat, output_mode
-                                           ß are read from this file,
+                                            are read from this file,
                                             ignores command line inputs for these fields
     --sh                                    semi-honest security model 
     --oo                                    report output only
