@@ -13,7 +13,7 @@ which are adapted from the [emp-toolkit](https://github.com/emp-toolkit).
 
 - After the set up, run `./config.sh` followed by `make` if required to build SYGC.
 
-## [Test and Evaluation](#test-and-evaluation)
+## Test and Evaluation
 - Run `./bin/test_SYGC.sh` to test build for correctness.
 It runs evaluation on precompiled netlists.
 
@@ -70,7 +70,71 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
 ## Program Interface
 
-- [millionaire.cpp](exec/millionaire.cpp) presents a minimal working example with the programming interface of SYGC. It is an implementation of the Yao's Millionaire's Problem through SYGC. The security model can be swicthed by changing the `SEC_SH` macro on [line 11](exec/millionaire.cpp#L11). To run the program,
+- [millionaire.cpp](exec/millionaire.cpp) presents a minimal working example with the programming interface of SYGC. 
+    It is an implementation of the Yao's Millionaire's Problem through SYGC. 
+    In the following, we explain different components of the code.
+
+    First, instantiate the program interface for the desired security model. 
+    This is the only place of the code where the security model is specified. 
+    `party` is either `ALICE` (garbler) or `BOB` (evaluator) -- taken as input from the terminal. 
+
+    ```cpp
+    #if SEC_SH
+        SYGCPI_SH* TGPI = new SYGCPI_SH(io, party);
+    #else
+        SYGCPI* TGPI = new SYGCPI(io, party);
+    #endif
+    ```
+    
+    Then we take respective input from the terminal. 
+    This part is specific to this particular problem, not dependent on the SYGC structure. 
+    ```cpp
+    if (TGPI->party == ALICE) cin >> a;
+    else cin >> b;
+    ```
+    
+    The next task is to create secret variables corresponding to the inputs.
+    This is done through three steps as shown: 
+    (i) regsiter the respective values (the bit width of each variable is set at this step), 
+    (ii) generate and transfer the corresponding labels, 
+    (iii) retreieve the labels to the respective secret variable. 
+    Note that in the code snippet above, each party inputs only one number.
+    In the code snippet that follows, 
+    the value of `a` is read only if the party is ALICE and 
+    the value of `b` is read only if the party is BOB;
+    otherwise they are ignored by the program.
+    The first argument of `TGPI->TG_int_init( ,  ,  )` refers to the *owner* of that particular secret variable. 
+    
+    ```cpp
+    auto a_x = TGPI->TG_int_init(ALICE, bit_width, a);
+    auto b_x = TGPI->TG_int_init(BOB, bit_width, b);
+
+    TGPI->gen_input_labels();
+
+    TGPI->retrieve_input_labels(a_x, ALICE, bit_width);
+    TGPI->retrieve_input_labels(b_x, BOB, bit_width);
+    ```
+    
+    Once the input labels are created and transferred, we can perform computaions on them.
+    In this particular example, 
+    we will compare the values of the two secret variables `a_x` and `b_x` and 
+    store the Boolean result in a new secret variable `res_x`.
+    Note that the declaration of `res_x` do not specify a owner since this is a secret variable, 
+    the value of which is *shared* between ALICE and BOB.
+    Moreover, the labels of `res_x` are computed through GC, 
+    therefore its declaraion does not need to be followed by `gen_input_labels()`
+    
+    ```cpp
+    auto res_x = TGPI->TG_int(1);
+    TGPI->lt(res_x, a_x, b_x, bit_width);
+    ```
+    
+    Since `res_x` is the final output in this example, ALICE and BOB combines the shares to reveal its input.
+    ```cpp
+    int64_t res = TGPI->reveal(res_x, 1, false);
+    ```
+
+    To run the program,
 
     On Alice's terminal
 
