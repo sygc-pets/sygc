@@ -150,7 +150,7 @@ The total execution runs for `cycles*repeat` times. The DFFs reset to `init` aft
 
     It will prompt to input the respective wealths. Upon receiving the input, the output will be displayed. 
 
-- To see the usage of all the available functions of SYGC, have a look at [unit_test](exec/unit_test.h) or [unit_test_sh](exec/unit_test_sh.h). The honest-but-curious version (with 'sh' suffix) supports vector operations, which are not yet supported by the malicious version of SYGC. Rest of the unit test are identical. To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation).
+- To see the usage of all the available functions of SYGC, have a look at [unit_test](exec/unit_test.h). To run the unit tests follow instructions at [Test and Evaluation](/README.md#test-and-evaluation).
 
 - [cnn_layers](sygc/cnn_layers.h) presents more complex examples based on the programming interface. It provides implementations of basic building blocks required for CNN inference. Currently it supports only the honest-but-curious security model. 
 
