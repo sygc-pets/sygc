@@ -13,71 +13,9 @@
 #include "sequential_2pc_sh.h"
 #include "sequential_2pc_exec_sh.h"
 #include "SYGC_config.h"
+#include "helper.h"
 
-#define MAX(a,b) ((a)>(b)?(a):(b))
-
-/*later move to emp-tool/util ---->*/
-
-template<typename T>
-vector<T> make_vector(size_t size) {
-	return std::vector<T>(size);
-}
-
-template <typename T, typename... Args>
-auto make_vector(size_t first, Args... sizes){
-	auto inner = make_vector<T>(sizes...);
-	return vector<decltype(inner)>(first, inner);
-}
-
-template<typename T>
-ostream& operator<< (ostream &os, const vector<T> &v){
-	for(auto it = v.begin (); it != v.end (); ++it) {
-		os << *it << ", ";
-	}
-	return os;
-}
-
-void input_vector(auto& A, uint64_t len0) {
-	A = make_vector<int64_t>(len0);	
-	for(uint64_t i0 = 0; i0 < len0; i0++)
-		cin >> A[i0];				
-}
-void input_vector(auto& A, uint64_t len0, uint64_t len1) {
-	A = make_vector<int64_t>(len0, len1);
-	for(uint64_t i0 = 0; i0 < len0; i0++)
-		for(uint64_t i1 = 0; i1 < len1; i1++)
-			cin >> A[i0][i1];
-}
-void input_vector(auto& A, uint64_t len0, uint64_t len1, uint64_t len2) {
-	A = make_vector<int64_t>(len0, len1, len2);
-	for(uint64_t i0 = 0; i0 < len0; i0++)
-		for(uint64_t i1 = 0; i1 < len1; i1++)
-			for (uint64_t i2 = 0; i2 < len2; i2++)
-				cin >> A[i0][i1][i2];
-}		
-void input_vector(auto& A, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
-	A = make_vector<int64_t>(len0, len1, len2, len3);
-	for(uint64_t i0 = 0; i0 < len0; i0++)
-		for(uint64_t i1 = 0; i1 < len1; i1++)
-			for (uint64_t i2 = 0; i2 < len2; i2++)
-				for (uint64_t i3 = 0; i3 < len3; i3++)
-					cin >> A[i0][i1][i2][i3];
-}	
-
-void dec_vector_to_bin(bool*& bin, vector<int64_t> dec, vector<uint64_t> bit_len){
-	uint64_t BIT_LEN = accumulate(bit_len.begin(), bit_len.end(), 0);
-	uint64_t size = dec.size();
-	uint64_t k = 0;
-	for (uint64_t i = 0; i < size; i++){
-		bitset<64> bits(dec[i]);
-		for (uint64_t j = 0; j < bit_len[i]; j++){
-			bin[BIT_LEN-1-k] = bits[bit_len[i]-1-j];
-			k++;
-		}
-	}
-}
-
-/*<----*/
+using namespace std;
 
 class SYGCPI_SH{
 	public:
@@ -86,8 +24,7 @@ class SYGCPI_SH{
 	SequentialC2PC_SH* twopc;
 	
 	vector<int64_t> input, output;
-	vector<uint64_t> bit_width_A, bit_width_B;	
-	string input_hex_str, output_hex_str;
+	vector<uint64_t> bit_width_A, bit_width_B;
 	
 	block* labels_A;
 	block* labels_B;
@@ -265,7 +202,7 @@ class SYGCPI_SH{
 		return Z;
 	}
 
-	/***cleare memory alloacted to secret variable***/
+	/***clear memory alloacted to secret variable***/
 
 	void clear_TG_int(auto& A){
 		delete [] A;

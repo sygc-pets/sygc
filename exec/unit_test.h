@@ -4,10 +4,9 @@
 #include "sygc/program_interface.h"
 #include "exec/exec_common.h"
 
-void unit_test(NetIO* io, int party) {
+void unit_test(auto TGPI) {
 	
-	SYGCPI* TGPI = new SYGCPI(io, party);
-	io->flush();
+	cout << "----- test phase 0: scalers ----" << endl;
 
 	uint64_t a_bits = 19, b_bits = 24, m_bits = MAX(a_bits, b_bits);
 	int64_t a = rand_L_U(), b = rand_L_U();
@@ -15,10 +14,33 @@ void unit_test(NetIO* io, int party) {
 	
 	auto a_x = TGPI->TG_int_init(ALICE, a_bits, a);
 	auto b_x = TGPI->TG_int_init(BOB, b_bits, b);
+		
+	/*needed for test phase 2: vectors, but has to be done before gen_input_labels() ---->*/	
+	uint64_t vector_bits = 64;	
+	auto A0 = make_vector<int64_t>(8);	
+	input_vector(A0, 8);
+	auto A1 = make_vector<int64_t>(4, 3);		
+	input_vector(A1, 4, 3);
+	auto A2 = make_vector<int64_t>(2, 3, 4, 5);	
+	input_vector(A2, 2, 3, 4, 5);		
+	auto B0 = make_vector<int64_t>(5, 5, 1, 16);
+	input_vector(B0, 5, 5, 1, 16);
+	auto B1 = make_vector<int64_t>(3, 5);	
+	input_vector(B1, 3, 5);
+	auto B2 = make_vector<int64_t>(4);
+	input_vector(B2, 4);	
+	
+	auto A0_x = TGPI->TG_int_init(ALICE, vector_bits, A0, 8);
+	auto A1_x = TGPI->TG_int_init(ALICE, vector_bits, A1, 4, 3);
+	auto A2_x = TGPI->TG_int_init(ALICE, vector_bits, A2, 2, 3, 4, 5);
+	auto B0_x = TGPI->TG_int_init(BOB, vector_bits, B0, 5, 5, 1, 16);
+	auto B1_x = TGPI->TG_int_init(BOB, vector_bits, B1, 3, 5);
+	auto B2_x = TGPI->TG_int_init(BOB, vector_bits, B2, 4);
+	
 	TGPI->gen_input_labels();
+	
 	TGPI->retrieve_input_labels(a_x, ALICE, a_bits);
 	TGPI->retrieve_input_labels(b_x, BOB, b_bits);
-	TGPI->clear_input_labels();
 	int64_t a_chk = TGPI->reveal(a_x, a_bits);
 	int64_t b_chk = TGPI->reveal(b_x, b_bits);
 	if (TGPI->party == BOB) 
@@ -32,7 +54,6 @@ void unit_test(NetIO* io, int party) {
 	if (TGPI->party == BOB) 
 		verify_n_report("assign public or secret values", (vector<int64_t>){t0_chk, t1_chk}, (vector<int64_t>){a, b});
 
-	
 	auto t2_x = TGPI->TG_int(m_bits);
 	auto t2__x = TGPI->TG_int(a_bits);
 	TGPI->add(t2_x, a_x, b_x, a_bits, b_bits);
@@ -87,7 +108,6 @@ void unit_test(NetIO* io, int party) {
 	int64_t t7__chk = TGPI->reveal(t7__x, a_bits);
 	if (TGPI->party == BOB) 
 		verify_n_report("minimum of public or secret values", (vector<int64_t>){t7_chk, t7__chk}, (vector<int64_t>){MIN(a, b), MIN(a, b)});
-
 
 	auto t8_x = TGPI->TG_int(a_bits);
 	TGPI->neg(t8_x, a_x, a_bits);
@@ -216,6 +236,135 @@ void unit_test(NetIO* io, int party) {
 	TGPI->clear_TG_int (t19_x);
 	TGPI->clear_TG_int (t20_x);
 	TGPI->clear_TG_int (t21_x);
+	
+	cout << "----- test phase 1: vectors ----" << endl;	
+	
+	TGPI->retrieve_input_vector_labels(A0_x, ALICE, vector_bits, 8);
+	TGPI->retrieve_input_vector_labels(A1_x, ALICE, vector_bits, 4, 3);
+	TGPI->retrieve_input_vector_labels(A2_x, ALICE, vector_bits, 2, 3, 4, 5);
+	TGPI->retrieve_input_vector_labels(B0_x, BOB, vector_bits, 5, 5, 1, 16);
+	TGPI->retrieve_input_vector_labels(B1_x, BOB, vector_bits, 3, 5);	
+	TGPI->retrieve_input_vector_labels(B2_x, BOB, vector_bits, 4);		
+
+	TGPI->clear_input_labels(); //all the inputs has been retrieved
+	
+	auto A0_check = make_vector<int64_t>(8);
+	TGPI->reveal_vector(A0_check, A0_x, vector_bits, 8);	
+	if (TGPI->party == BOB) 
+		verify_n_report("1d vector init by Alice", A0_check, A0);
+		
+	auto A1_check = make_vector<int64_t>(4, 3);	
+	TGPI->reveal_vector(A1_check, A1_x, vector_bits, 4, 3);
+	if (TGPI->party == BOB) 
+		verify_n_report("2d vector init by Alice", A1_check, A1);	
+	
+	auto A2_check = make_vector<int64_t>(2, 3, 4, 5);	
+	TGPI->reveal_vector(A2_check, A2_x, vector_bits, 2, 3, 4, 5);
+	if (TGPI->party == BOB) 
+		verify_n_report("3d vector init by Alice", A2_check, A2);			
+	
+	auto B0_check = make_vector<int64_t>(5, 5, 1, 16);	
+	TGPI->reveal_vector(B0_check, B0_x, vector_bits, 5, 5, 1, 16);	
+	if (TGPI->party == BOB) 
+		verify_n_report("3d vector init by Bob", B0_check, B0);	
+		
+	auto B1_check = make_vector<int64_t>(3, 5);	
+	TGPI->reveal_vector(B1_check, B1_x, vector_bits, 3, 5);
+	if (TGPI->party == BOB) 
+		verify_n_report("2d vector init by Bob", B1_check, B1);
+	
+	auto B2_check = make_vector<int64_t>(4);	
+	TGPI->reveal_vector(B2_check, B2_x, vector_bits, 4);
+	if (TGPI->party == BOB) 
+		verify_n_report("1d vector init by Bob", B2_check, B2);
+
+	auto T0_x = TGPI->TG_int_init(PUBLIC, vector_bits, A0, 8);
+	auto T1_x = TGPI->TG_int_init(PUBLIC, vector_bits, A1, 4, 3);
+	auto T2_x = TGPI->TG_int_init(PUBLIC, vector_bits, A2, 2, 3, 4, 5);
+	auto T3_x = TGPI->TG_int(vector_bits, 5, 5, 1, 16);
+	auto T4_x = TGPI->TG_int(vector_bits, 3, 5);
+	auto T5_x = TGPI->TG_int(vector_bits, 4);
+	
+	auto T0_chk = make_vector<int64_t>(8);
+	TGPI->reveal_vector(T0_chk, T0_x, vector_bits, 8);
+	if (TGPI->party == BOB) 
+		verify_n_report("1d vector assignment to public", T0_chk, A0);
+	
+	auto T1_chk = make_vector<int64_t>(4, 3);
+	TGPI->reveal_vector(T1_chk, T1_x, vector_bits, 4, 3);
+	if (TGPI->party == BOB) 
+		verify_n_report("2d vector assignment to public", T1_chk, A1);
+	
+	auto T2_chk = make_vector<int64_t>(2, 3, 4, 5);
+	TGPI->reveal_vector(T2_chk, T2_x, vector_bits, 2, 3, 4, 5);
+	if (TGPI->party == BOB) 
+		verify_n_report("4d vector assignment to public", T2_chk, A2);
+
+	TGPI->assign_vector(T3_x, B0_x, vector_bits, 5, 5, 1, 16);
+	auto T3_chk = make_vector<int64_t>(5, 5, 1, 16);
+	TGPI->reveal_vector(T3_chk, T3_x, vector_bits, 5, 5, 1, 16);
+	if (TGPI->party == BOB) 
+		verify_n_report("4d vector assignment to secret", T3_chk, B0);
+
+	TGPI->assign_vector(T4_x, B1_x, vector_bits, 3, 5);
+	auto T4_chk = make_vector<int64_t>(3, 5);
+	TGPI->reveal_vector(T4_chk, T4_x, vector_bits, 3, 5);
+	if (TGPI->party == BOB) 
+		verify_n_report("2d vector assignment to secret", T4_chk, B1);
+
+	TGPI->assign_vector(T5_x, B2_x, vector_bits, 4);
+	auto T5_chk = make_vector<int64_t>(4);
+	TGPI->reveal_vector(T5_chk, T5_x, vector_bits, 4);
+	if (TGPI->party == BOB) 
+		verify_n_report("1d vector assignment to secret", T5_chk, B2);
+
+	int64_t t50 = 0;
+	auto t50_x = TGPI->TG_int_init(PUBLIC, vector_bits, (int64_t)0);
+	for (uint64_t i = 0; i < 8; i++){
+		t50 += A0[i];
+		TGPI->add(t50_x, t50_x, A0_x[i], vector_bits);
+	}
+	int64_t t50_chk = TGPI->reveal(t50_x, vector_bits);
+	if (TGPI->party == BOB) 
+		verify_n_report("1d vector accumulation", t50_chk, t50);
+	
+	uint64_t bit_width_3 = 15, bit_width_4 = 17, bit_width_5 = 35, bit_width_G = 64, rs_bits = 3;
+	uint64_t row_3 = 3, inner = 3, col_4 = 3;
+	
+	auto T6_x = TGPI->TG_int(bit_width_3, row_3, inner);
+	auto T6 = make_vector<int64_t>(row_3, inner);
+	input_vector(T6, row_3, inner);
+	TGPI->assign_vector(T6_x, T6, bit_width_3, row_3, inner);	
+	auto T7_x = TGPI->TG_int(bit_width_4, inner, col_4);
+	auto T7 = make_vector<int64_t>(inner, col_4);
+	input_vector(T7, inner, col_4);
+	TGPI->assign_vector(T7_x, T7, bit_width_4, inner, col_4);
+	
+	auto T8_x = TGPI->TG_int(bit_width_5, row_3, col_4);	
+	TGPI->mat_mult(row_3, inner, col_4, T6_x, T7_x, T8_x, rs_bits, bit_width_3, bit_width_4, bit_width_5, bit_width_G);	
+	auto T8_chk = make_vector<int64_t>(row_3, col_4);
+	TGPI->reveal_vector(T8_chk, T8_x, bit_width_5, row_3, col_4);	
+	auto T8_ref = make_vector<int64_t>(row_3, col_4);
+	mat_mult(row_3, inner, col_4, T6, T7, T8_ref, rs_bits);
+
+	if (TGPI->party == BOB) 
+		verify_n_report("2d matrix product", T8_chk, T8_ref);
+	
+	TGPI->clear_TG_int(A0_x, 8);
+	TGPI->clear_TG_int(A1_x, 4, 3);
+	TGPI->clear_TG_int(A2_x, 2, 3, 4, 5);
+	TGPI->clear_TG_int(B0_x, 5, 5, 1, 16);
+	TGPI->clear_TG_int(B1_x, 3, 5);
+	TGPI->clear_TG_int(B2_x, 4);	
+	TGPI->clear_TG_int(T0_x, 8);
+	TGPI->clear_TG_int(T1_x, 4, 3);
+	TGPI->clear_TG_int(T2_x, 2, 3, 4, 5);
+	TGPI->clear_TG_int(T3_x, 5, 5, 1, 16);
+	TGPI->clear_TG_int(T4_x, 3, 5);
+	TGPI->clear_TG_int(T5_x, 4);
+	TGPI->clear_TG_int(T6_x, row_3, inner);
+	TGPI->clear_TG_int(T7_x, inner, col_4);
+	TGPI->clear_TG_int(T8_x, row_3, col_4);	
 	
 	delete TGPI;
 

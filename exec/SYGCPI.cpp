@@ -6,7 +6,6 @@
 #include "sygc/program_interface_sh.h"
 #include "exec/exec_common.h"
 #include "exec/unit_test.h"
-#include "exec/unit_test_sh.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -49,8 +48,21 @@ int main(int argc, char** argv) {
 	NetIO* io = new NetIO(party==ALICE ? nullptr:server_ip.c_str(), port, true);
 	io->set_nodelay();
 	
-	if (vm.count("sh")) unit_test_sh(io, party);
-	else unit_test(io, party);
+	SYGCPI_SH* TGPI_SH;
+	SYGCPI* TGPI; 
+	
+	if (vm.count("sh")){
+		cout << "testing program interface in semi-honest setting" << endl;
+		TGPI_SH = new SYGCPI_SH(io, party);
+		io->flush();
+		unit_test(TGPI_SH);		
+	}
+	else {
+		cout << "testing program interface in malicious setting" << endl;
+		TGPI = new SYGCPI(io, party, 100000, 100000);
+		io->flush();
+		unit_test(TGPI);
+	}
 	
 	delete io;
 	

@@ -11,6 +11,68 @@ using std::endl;
 using std::flush;
 #undef align
 
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#define MIN(a,b) ((a)<(b)?(a):(b))
+
+template<typename T>
+vector<T> make_vector(size_t size) {
+	return std::vector<T>(size);
+}
+
+template <typename T, typename... Args>
+auto make_vector(size_t first, Args... sizes){
+	auto inner = make_vector<T>(sizes...);
+	return vector<decltype(inner)>(first, inner);
+}
+
+template<typename T>
+std::ostream& operator<< (std::ostream &os, const vector<T> &v){
+	for(auto it = v.begin (); it != v.end (); ++it) {
+		os << *it << ", ";
+	}
+	return os;
+}
+
+void input_vector(auto& A, uint64_t len0) {
+	A = make_vector<int64_t>(len0);	
+	for(uint64_t i0 = 0; i0 < len0; i0++)
+		std::cin >> A[i0];				
+}
+void input_vector(auto& A, uint64_t len0, uint64_t len1) {
+	A = make_vector<int64_t>(len0, len1);
+	for(uint64_t i0 = 0; i0 < len0; i0++)
+		for(uint64_t i1 = 0; i1 < len1; i1++)
+			std::cin >> A[i0][i1];
+}
+void input_vector(auto& A, uint64_t len0, uint64_t len1, uint64_t len2) {
+	A = make_vector<int64_t>(len0, len1, len2);
+	for(uint64_t i0 = 0; i0 < len0; i0++)
+		for(uint64_t i1 = 0; i1 < len1; i1++)
+			for (uint64_t i2 = 0; i2 < len2; i2++)
+				std::cin >> A[i0][i1][i2];
+}		
+void input_vector(auto& A, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
+	A = make_vector<int64_t>(len0, len1, len2, len3);
+	for(uint64_t i0 = 0; i0 < len0; i0++)
+		for(uint64_t i1 = 0; i1 < len1; i1++)
+			for (uint64_t i2 = 0; i2 < len2; i2++)
+				for (uint64_t i3 = 0; i3 < len3; i3++)
+					std::cin >> A[i0][i1][i2][i3];
+}	
+
+void dec_vector_to_bin(bool*& bin, vector<int64_t> dec, vector<uint64_t> bit_len){
+	uint64_t BIT_LEN = accumulate(bit_len.begin(), bit_len.end(), 0);
+	uint64_t size = dec.size();
+	uint64_t k = 0;
+	for (uint64_t i = 0; i < size; i++){
+		std::bitset<64> bits(dec[i]);
+		for (uint64_t j = 0; j < bit_len[i]; j++){
+			bin[BIT_LEN-1-k] = bits[bit_len[i]-1-j];
+			k++;
+		}
+	}
+}
+
 namespace emp {
 
 void send_bool_aligned(NetIO* io, const bool * data, int length) {

@@ -10,24 +10,9 @@
 #include "sequential_2pc.h"
 #include "sequential_2pc_exec.h"
 #include "SYGC_config.h"
-
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#define MIN(a,b) ((a)<(b)?(a):(b))
+#include "helper.h"
 
 using namespace std;
-
-void dec_vector_to_bin_1(bool*& bin, vector<int64_t> dec, vector<uint64_t> bit_len){
-	uint64_t BIT_LEN = accumulate(bit_len.begin(), bit_len.end(), 0);
-	uint64_t size = dec.size();
-	uint64_t k = 0;
-	for (uint64_t i = 0; i < size; i++){
-		bitset<64> bits(dec[i]);
-		for (uint64_t j = 0; j < bit_len[i]; j++){
-			bin[BIT_LEN-1-k] = bits[bit_len[i]-1-j];
-			k++;
-		}
-	}
-}
 
 class SYGCPI{
 	public:
@@ -37,7 +22,6 @@ class SYGCPI{
 	
 	vector<int64_t> input, output;
 	vector<uint64_t> bit_width_A, bit_width_B;	
-	//string input_hex_str, output_hex_str;
 	
 	lmkvm* lmkvm_A;
 	lmkvm* lmkvm_B;
@@ -61,6 +45,29 @@ class SYGCPI{
 		if(owner == party) input.push_back(val);
 		if(owner == ALICE) bit_width_A.push_back(bit_width);
 		else bit_width_B.push_back(bit_width);
+	}
+	
+	void register_input_vector(int owner, uint64_t bit_width, auto val, uint64_t len0){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			register_input(owner, bit_width, val[i0]);
+	}
+	void register_input_vector(int owner, uint64_t bit_width, auto val, uint64_t len0, uint64_t len1){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				register_input(owner, bit_width, val[i0][i1]);
+	}
+	void register_input_vector(int owner, uint64_t bit_width, auto val, uint64_t len0, uint64_t len1, uint64_t len2){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					register_input(owner, bit_width, val[i0][i1][i2]);
+	}
+	void register_input_vector(int owner, uint64_t bit_width, auto val, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++)
+						register_input(owner, bit_width, val[i0][i1][i2][i3]);
 	}
 
 	/***assign public or secret value to a secret variable***/
@@ -97,12 +104,57 @@ class SYGCPI{
 		}
 		else assign(y_x, a_x, bit_width_y);
 	}
+
+	void assign_vector(auto& A_x, auto A, uint64_t bit_width, uint64_t len0) {	
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			assign(A_x[i0], A[i0], bit_width);				
+	}
+	void assign_vector(auto& A_x, auto A, uint64_t bit_width, uint64_t len0, uint64_t len1) {
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				assign(A_x[i0][i1], A[i0][i1], bit_width);
+	}
+	void assign_vector(auto& A_x, auto A, uint64_t bit_width, uint64_t len0, uint64_t len1, uint64_t len2) {
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					assign(A_x[i0][i1][i2], A[i0][i1][i2], bit_width);
+	}		
+	void assign_vector(auto& A_x, auto A, uint64_t bit_width, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++)
+						assign(A_x[i0][i1][i2][i3], A[i0][i1][i2][i3], bit_width);
+	}
 	
 	/***create secret variable***/
 	
 	lmkvm* TG_int(uint64_t bit_width){
 		lmkvm* Z;
 		Z = new lmkvm(bit_width);
+		return Z;
+	}
+	vector<lmkvm*> TG_int(uint64_t bit_width, size_t len0){
+		vector<lmkvm*> Z(len0);
+		for (uint64_t i0 = 0; i0 < len0; i0++)
+			Z[i0] = new lmkvm (bit_width);
+		return Z;
+	}
+	vector<vector<lmkvm*>> TG_int(uint64_t bit_width, size_t len0, size_t len1){
+		vector<vector<lmkvm*>> Z(len0, vector<lmkvm*>(len1));
+		for (uint64_t i0 = 0; i0 < len0; i0++)
+			for (uint64_t i1 = 0; i1 < len1; i1++)
+				Z[i0][i1] = new lmkvm (bit_width);
+		return Z;
+	}
+	vector<vector<vector<vector<lmkvm*>>>> TG_int(uint64_t bit_width, size_t len0, size_t len1, size_t len2, size_t len3){
+		vector<vector<vector<vector<lmkvm*>>>> Z(len0, std::vector<vector<vector<lmkvm*>>>(len1, vector<vector<lmkvm*>>(len2, std::vector<lmkvm*>(len3))));
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++)
+						Z[i0][i1][i2][i3] = new lmkvm (bit_width);
 		return Z;
 	}
 
@@ -118,11 +170,71 @@ class SYGCPI{
 		
 		return Z;
 	}
+	vector<lmkvm*> TG_int_init(int owner, uint64_t bit_width, auto val, size_t len0){
+		auto Z = TG_int(bit_width, len0);
+		
+		if(owner == PUBLIC)
+			assign_vector(Z, val, bit_width, len0);
+		else
+			register_input_vector(owner, bit_width, val, len0);
+		
+		return Z;
+	}
+	vector<vector<lmkvm*>> TG_int_init(int owner, uint64_t bit_width, auto val, size_t len0, size_t len1){
+		auto Z = TG_int(bit_width, len0, len1);
+		
+		if(owner == PUBLIC)
+			assign_vector(Z, val, bit_width, len0, len1);
+		else
+			register_input_vector(owner, bit_width, val, len0, len1);
+		
+		return Z;
+	}
+	vector<vector<vector<vector<lmkvm*>>>> TG_int_init(int owner, uint64_t bit_width, auto val, size_t len0, size_t len1, size_t len2, size_t len3){
+		auto Z = TG_int(bit_width, len0, len1, len2, len3);
+		
+		if(owner == PUBLIC)
+			assign_vector(Z, val, bit_width, len0, len1, len2, len3);
+		else
+			register_input_vector(owner, bit_width, val, len0, len1, len2, len3);
+		
+		return Z;
+	}
 
-	/***cleare memory alloacted to secret variable***/
+	/***clear memory alloacted to secret variable***/
 
 	void clear_TG_int(auto& A){
 		delete A;
+	}
+	void clear_TG_int(auto& A, uint64_t len0){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			delete A[i0];
+		A.clear();
+		A.shrink_to_fit();
+	}	
+	void clear_TG_int(auto& A, uint64_t len0, uint64_t len1){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				delete A[i0][i1];
+		A.clear();
+		A.shrink_to_fit();
+	}
+	void clear_TG_int(auto& A, uint64_t len0, uint64_t len1, uint64_t len2){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					delete A[i0][i1][i2];
+		A.clear();
+		A.shrink_to_fit();
+	}
+	void clear_TG_int(auto& A, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++)
+						delete A[i0][i1][i2][i3];
+		A.clear();
+		A.shrink_to_fit();
 	}
 
 	/***generate input labels and retrieve to corresponding secret variables***/
@@ -140,7 +252,7 @@ class SYGCPI{
 		vector<uint64_t> bit_width = (party == ALICE)? bit_width_A: bit_width_B;
 		
 		bool *IN = new bool[n];
-		dec_vector_to_bin_1(IN, input, bit_width);
+		dec_vector_to_bin(IN, input, bit_width);
 		
 		lmkvm_B = new lmkvm(cyc_rep_B*n1);
 		lmkvm_A = new lmkvm(cyc_rep_A*n2);
@@ -176,6 +288,26 @@ class SYGCPI{
 			retreived_lmkvm->copy(lmkvm_B->at(retreived_index_B), 0, bit_width);
 			retreived_index_B += bit_width;
 		}
+	}		
+
+	void retrieve_input_vector_labels(auto& retreived_vector_labels, int owner, uint64_t bit_width, uint64_t len0) {
+		retreived_vector_labels = TG_int(bit_width, len0);	
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			retrieve_input_labels(retreived_vector_labels[i0], owner, bit_width);				
+	}
+	void retrieve_input_vector_labels(auto& retreived_vector_labels, int owner, uint64_t bit_width, uint64_t len0, uint64_t len1) {
+		retreived_vector_labels = TG_int(bit_width, len0, len1);
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				retrieve_input_labels(retreived_vector_labels[i0][i1], owner, bit_width);
+	}		
+	void retrieve_input_vector_labels(auto& retreived_vector_labels, int owner, uint64_t bit_width, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3){
+		retreived_vector_labels = TG_int(bit_width, len0, len1, len2, len3);
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++)
+						retrieve_input_labels(retreived_vector_labels[i0][i1][i2][i3], owner, bit_width);
 	}	
 
 	/***reveal secret variable***/
@@ -199,6 +331,37 @@ class SYGCPI{
 	}
 	int64_t reveal(lmkvm* lmkvm_R){
 		return reveal(lmkvm_R, lmkvm_R->num_bits);
+	}
+	
+	void reveal_vector(auto& revealed_vector, auto vector_labels, uint64_t bit_width, uint64_t len0) {
+		revealed_vector = make_vector<int64_t>(len0);	
+		for(uint64_t i0 = 0; i0 < len0; i0++){
+			revealed_vector[i0] = reveal(vector_labels[i0], bit_width);
+		}				
+	}
+	void reveal_vector(auto& revealed_vector, auto vector_labels, uint64_t bit_width, uint64_t len0, uint64_t len1) {
+		revealed_vector = make_vector<int64_t>(len0, len1);
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++){
+				revealed_vector[i0][i1] = reveal(vector_labels[i0][i1], bit_width);
+			}
+	}
+	void reveal_vector(auto& revealed_vector, auto vector_labels, uint64_t bit_width, uint64_t len0, uint64_t len1, uint64_t len2) {
+		revealed_vector = make_vector<int64_t>(len0, len1, len2);
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++){
+					revealed_vector[i0][i1][i2] = reveal(vector_labels[i0][i1][i2], bit_width);
+				}
+	}		
+	void reveal_vector(auto& revealed_vector, auto vector_labels, uint64_t bit_width, uint64_t len0, uint64_t len1, uint64_t len2, uint64_t len3) {
+		revealed_vector = make_vector<int64_t>(len0, len1, len2, len3);
+		for(uint64_t i0 = 0; i0 < len0; i0++)
+			for(uint64_t i1 = 0; i1 < len1; i1++)
+				for (uint64_t i2 = 0; i2 < len2; i2++)
+					for (uint64_t i3 = 0; i3 < len3; i3++){
+						revealed_vector[i0][i1][i2][i3] = reveal(vector_labels[i0][i1][i2][i3], bit_width);
+					}
 	}
 
 	/***arithmetic and logical operations***/
@@ -368,6 +531,42 @@ class SYGCPI{
 		}
 		delete a1_x;
 		delete a2_x;
+	}
+	
+	void mat_mult(uint64_t row_A, uint64_t inner, uint64_t col_B, auto &A, auto &B, auto &C, int64_t rs_bits, uint64_t bit_width_A, uint64_t bit_width_B, uint64_t bit_width_C, uint64_t bit_width_G){
+	
+		string netlist_address = string(NETLIST_PATH_PI) + "mac_" + to_string(bit_width_A) + "_" + to_string(bit_width_B) + "_" + to_string(bit_width_G) + "bit.emp.bin";	
+		CircuitFile cf(netlist_address.c_str(), true);
+		uint64_t cycles = inner, repeat = 1, output_mode = 3;
+		
+		lmkvm* lmkvm_A = new lmkvm(row_A*inner*bit_width_A);
+		lmkvm* lmkvm_B = new lmkvm(inner*col_B*bit_width_B);
+		lmkvm* lmkvm_C = new lmkvm(bit_width_G);
+		
+		for (uint64_t i = 0; i < row_A; i++)
+			for (uint64_t j = 0; j < inner; j++)
+				for (uint64_t k = 0; k < bit_width_A; k++)	
+					lmkvm_A->copy(A[i][j]->at(k), (i*inner + j)*bit_width_A + k, 1);
+			
+		for (uint64_t i = 0; i < col_B; i++)
+			for (uint64_t j = 0; j < inner; j++)
+				for (uint64_t k = 0; k < bit_width_B; k++)
+					lmkvm_B->copy(B[j][i]->at(k), (i*inner + j)*bit_width_B + k, 1);
+			
+		for (uint64_t i = 0; i < row_A; i++){
+			for (uint64_t j = 0; j < col_B; j++){
+				sequential_2pc_exec(twopc, lmkvm_B->at(j*inner*bit_width_B), lmkvm_A->at(i*inner*bit_width_A), nullptr, lmkvm_C, party, io, &cf, cycles, repeat, output_mode);
+				right_shift(lmkvm_C, rs_bits, bit_width_G);
+				assign(C[i][j], lmkvm_C, bit_width_C);
+				cout << fixed << setprecision(2) << setfill('0');
+				cout << "\r   " << ((double)(i*col_B+j+1))/(row_A*col_B)*100 << "%";
+			}
+		}
+		cout << endl;
+		
+		delete lmkvm_A;
+		delete lmkvm_B;
+		delete lmkvm_C;
 	}
 	
 	/*y = a / b*/
